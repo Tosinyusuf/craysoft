@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { SpeechClient, protos } from '@google-cloud/speech';
 
+if (!process.env.GOOGLE_CLIENT_EMAIL || !process.env.GOOGLE_PRIVATE_KEY || !process.env.NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT) {
+  throw new Error('Missing required environment variables');
+}
+
 const speechClient = new SpeechClient({
   credentials: {
     client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
     project_id: process.env.NEXT_PUBLIC_GOOGLE_CLOUD_PROJECT,
   },
 });
@@ -40,7 +44,7 @@ export async function POST(request: Request) {
     }
 
     const transcription = response.results
-      ?.map(result => result.alternatives?.[0]?.transcript || '')
+      ?.map((result: protos.google.cloud.speech.v1.ISpeechRecognitionResult) => result.alternatives?.[0]?.transcript || '')
       .join(' ');
 
     return NextResponse.json({ transcription });
