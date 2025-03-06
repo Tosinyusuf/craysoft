@@ -1,0 +1,54 @@
+/* apps/poc/styles/Home.module.css (Admin Panel) */
+.container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .controls {
+    margin-top: 2rem;
+    padding: 2rem;
+    background: #f5f5f5;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .startButton, .stopButton {
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .startButton {
+    background: #4CAF50;
+    color: white;
+  }
+  
+  .stopButton {
+    background: #f44336;
+    color: white;
+  }
+  
+  .status {
+    margin-top: 2rem;
+    padding: 1rem;
+    background: white;
+    color: black;
+    border-radius: 5px;
+  }
+  
+  .languages {
+    margin-top: 2rem;
+  }
+  
+  .language {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem;
+    background: #2196F3;
+    color: white;
+    border-radius: 20px;
+  }

@@ -1,0 +1,90 @@
+/* apps/poc/styles/streaming.module.css */
+.container {
+  padding: 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.controls {
+  margin-top: 2rem;
+}
+
+.startButton,
+.stopButton {
+  padding: 0.5rem 1rem;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.startButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+.stopButton {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+.status {
+  margin: 1rem 0;
+}
+
+.error {
+  color: #f44336;
+  padding: 1rem;
+  border: 1px solid #f44336;
+  border-radius: 4px;
+  margin-top: 1rem;
+}
+
+.transcriptBox {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 200px;
+}
+
+.transcriptBox h3 {
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.interim {
+  color: gray;
+  font-style: italic;
+}
+
+.languageSelect {
+  padding: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+}
+
+.translationBox {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 100px;
+  background-color: #f8f9fa;
+}
+
+.transcriptBox, .translationBox {
+  margin-top: 2rem;
+  padding: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  min-height: 100px;
+}
+
+.transcriptBox h3, .translationBox h3 {
+  margin-bottom: 1rem;
+  color: #333;
+}
