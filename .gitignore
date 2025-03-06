@@ -41,3 +41,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Google Cloud credentials
+*.json
+instantly-450515-75528f50703b.json
+
+# Environment files
+.env
+.env.*
+!.env.example
