@@ -4,7 +4,7 @@
 // apps/poc/pages/index.tsx
 import React, { useState, useEffect, useRef } from "react";
 import styles from "./admin.module.css";
-import { debounce } from 'lodash'; // Add lodash to your dependencies
+import { debounce } from "lodash"; // Add lodash to your dependencies
 
 // Properly typed interface for SpeechRecognition
 interface SpeechRecognitionEvent extends Event {
@@ -52,15 +52,13 @@ const AdminPanel = () => {
   const [translation, setTranslation] = useState("");
   const [targetLanguage, setTargetLanguage] = useState("ES");
   const [error, setError] = useState<string | null>(null);
-  
+
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  
+
   // Debounced translation function
   const debouncedTranslate = useRef(
     debounce(async (text: string) => {
-
-      console.log(text,"text")
       if (!text.trim()) return;
       try {
         const response = await fetch("/api/translate", {
@@ -69,44 +67,60 @@ const AdminPanel = () => {
           body: JSON.stringify({ text, targetLang: targetLanguage }),
         });
 
-        if (!response.ok) throw new Error("Translation failed");
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || "Translation failed");
+        }
 
         const data = await response.json();
         setTranslation(data.translation);
       } catch (error) {
         console.error("Translation error:", error);
-        setError("Translation failed");
+        setError(error instanceof Error ? error.message : "Translation failed");
       }
     }, 1000)
   ).current;
 
   useEffect(() => {
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    // Check if we're in the browser
+    if (typeof window === "undefined") {
+      console.log("Running on server side");
+      return;
+    }
 
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
 
-    console.log(SpeechRecognition,"SpeechRecognition")
-    if (SpeechRecognition) {
+    if (!SpeechRecognition) {
+      console.error("Speech Recognition not supported in this browser");
+      setError("Speech Recognition not supported in this browser");
+      return;
+    }
+
+    try {
       setIsSupported(true);
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
 
+      console.log(recognitionRef.current, "recognitionRef.current");
       recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         let finalTranscript = "";
-        
+
+        console.log(event, "event");
         for (let i = event.resultIndex; i < event?.results?.length; i++) {
           const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
             finalTranscript += transcript + " ";
-            console.log(finalTranscript,"finalTranscript")
+            console.log(finalTranscript, "finalTranscript");
 
             if (textareaRef.current) {
               const currentValue = textareaRef.current.value;
               const cursorPosition = textareaRef.current.selectionStart;
               const isAtEnd = cursorPosition === currentValue.length;
-    
+
               textareaRef.current.value = currentValue + finalTranscript;
-    
+
               // Maintain cursor position unless it was at the end
               if (!isAtEnd && cursorPosition !== null) {
                 textareaRef.current.selectionStart = cursorPosition;
@@ -115,11 +129,8 @@ const AdminPanel = () => {
               // Trigger translation for final transcripts
               debouncedTranslate(currentValue + finalTranscript || "");
             }
-            
           }
         }
-
-     
       };
 
       recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -133,6 +144,10 @@ const AdminPanel = () => {
           recognitionRef.current.start();
         }
       };
+    } catch (error) {
+      console.error("Error initializing Speech Recognition:", error);
+      setError("Failed to initialize Speech Recognition");
+      setIsSupported(false);
     }
 
     return () => {
@@ -150,7 +165,8 @@ const AdminPanel = () => {
   const startListening = () => {
     try {
       if (!recognitionRef.current) {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const SpeechRecognition =
+          window.SpeechRecognition || window.webkitSpeechRecognition;
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;

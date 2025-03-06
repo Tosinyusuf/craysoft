@@ -5,6 +5,14 @@ const DEEPL_API_URL = 'https://api-free.deepl.com/v2/translate';
 
 export async function POST(request: Request) {
   try {
+    if (!process.env.DEEPL_API_KEY) {
+      console.error('DEEPL_API_KEY not found');
+      return NextResponse.json(
+        { error: 'Translation service not configured' },
+        { status: 503 }
+      );
+    }
+
     const { text, targetLang } = await request.json();
 
     if (!text || !text.trim()) {
