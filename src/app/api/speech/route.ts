@@ -28,12 +28,12 @@ export async function POST(request: Request) {
       enableAutomaticPunctuation: true,
     };
 
-    const [response] = await speechClient.recognize({
+    const [response] = (await speechClient.recognize({
       config,
       audio: { content: audio },
     }).catch(e => {
       throw e;
-    });
+    })) as [protos.google.cloud.speech.v1.IRecognizeResponse];
 
     if (!response.results || response.results.length === 0) {
       return NextResponse.json({ transcription: '' });
