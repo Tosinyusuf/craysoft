@@ -82,7 +82,6 @@ const AdminPanel = () => {
   ).current;
 
   useEffect(() => {
-    // Check if we're in the browser
     if (typeof window === "undefined") {
       console.log("Running on server side");
       return;
@@ -94,69 +93,19 @@ const AdminPanel = () => {
     if (!SpeechRecognition) {
       console.error("Speech Recognition not supported in this browser");
       setError("Speech Recognition not supported in this browser");
+      setIsSupported(false);
       return;
     }
 
-    try {
-      setIsSupported(true);
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-
-      console.log(recognitionRef.current, "recognitionRef.current");
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-        let finalTranscript = "";
-
-        console.log(event, "event");
-        for (let i = event.resultIndex; i < event?.results?.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript + " ";
-            console.log(finalTranscript, "finalTranscript");
-
-            if (textareaRef.current) {
-              const currentValue = textareaRef.current.value;
-              const cursorPosition = textareaRef.current.selectionStart;
-              const isAtEnd = cursorPosition === currentValue.length;
-
-              textareaRef.current.value = currentValue + finalTranscript;
-
-              // Maintain cursor position unless it was at the end
-              if (!isAtEnd && cursorPosition !== null) {
-                textareaRef.current.selectionStart = cursorPosition;
-                textareaRef.current.selectionEnd = cursorPosition;
-              }
-              // Trigger translation for final transcripts
-              debouncedTranslate(currentValue + finalTranscript || "");
-            }
-          }
-        }
-      };
-
-      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-        console.error("Speech recognition error:", event.error);
-        setIsListening(false);
-        setError(event.error);
-      };
-
-      recognitionRef.current.onend = () => {
-        if (isListening && recognitionRef.current) {
-          recognitionRef.current.start();
-        }
-      };
-    } catch (error) {
-      console.error("Error initializing Speech Recognition:", error);
-      setError("Failed to initialize Speech Recognition");
-      setIsSupported(false);
-    }
+    setIsSupported(true);
 
     return () => {
-      debouncedTranslate.cancel();
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+      debouncedTranslate.cancel();
     };
-  }, [isListening, debouncedTranslate]);
+  }, []);
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     debouncedTranslate(e.target.value);
@@ -170,6 +119,49 @@ const AdminPanel = () => {
         recognitionRef.current = new SpeechRecognition();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
+
+        // Set up event handlers
+        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+          let finalTranscript = "";
+
+          console.log(event, "event");
+          for (let i = event.resultIndex; i < event?.results?.length; i++) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalTranscript += transcript + " ";
+              console.log(finalTranscript, "finalTranscript");
+
+              if (textareaRef.current) {
+                const currentValue = textareaRef.current.value;
+                const cursorPosition = textareaRef.current.selectionStart;
+                const isAtEnd = cursorPosition === currentValue.length;
+
+                textareaRef.current.value = currentValue + finalTranscript;
+
+                // Maintain cursor position unless it was at the end
+                if (!isAtEnd && cursorPosition !== null) {
+                  textareaRef.current.selectionStart = cursorPosition;
+                  textareaRef.current.selectionEnd = cursorPosition;
+                }
+                // Trigger translation for final transcripts
+                debouncedTranslate(currentValue + finalTranscript || "");
+              }
+            }
+          }
+        };
+
+        recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+          console.error("Speech recognition error:", event.error);
+          setIsListening(false);
+          setError(event.error);
+        };
+
+        recognitionRef.current.onend = () => {
+          console.log("Recognition ended");
+          if (isListening && recognitionRef.current) {
+            recognitionRef.current.start();
+          }
+        };
       }
       recognitionRef.current.start();
       setIsListening(true);
